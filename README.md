@@ -37,7 +37,7 @@ This operation allows you to delete a specified sheet from Google Sheets. You wi
 This operation enables you to delete data from a specified range in a sheet in Google Sheets. You will need to provide the document ID, sheet name, and the range from which to delete data.
 
 ## Configuration Requirements
-To use this application, you need to have an authentication configuration file from Google Cloud (e.g., `gsheets-credentials.json`). This file should be located in the `gkey` folder. You should also have Google Sheets API access set up in your Google account.
+To use this application, you need to have an authentication configuration file from Google Cloud (e.g., `gsheets-credentials.json`). This file should be located in the `gkey` folder. You should also have Google Sheets API access set up in your Google account. Also, when you start working with the application, you need to initialize the spreadsheetID, it can be found in the link line to the Google Sheet page, for example, in the above line it will be "1eXuEKYP35Y94PIgI6-Nym46ke7GY4_R7ZUXig1zaiBM": https://docs.google.com/spreadsheets/d/1eXuEKYP35Y94PIgI6-Nym46ke7GY4_R7ZUXig1zaiBM/edit#gid=1635680430 
 
 ## Installation and Execution
 1. Clone the repository to your computer.
