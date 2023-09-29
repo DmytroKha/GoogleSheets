@@ -207,7 +207,13 @@ func (app *GoogleSheetsApp) handleDeleteData() {
 }
 
 func (app *GoogleSheetsApp) readAndPrintData(sheetName string, sheetRange string) error {
-	readRange := sheetName + "!" + sheetRange
+	var readRange string
+	if sheetRange != "" {
+		readRange = sheetName + "!" + sheetRange
+	} else {
+		readRange = sheetName
+	}
+
 	resp, err := app.srv.Spreadsheets.Values.Get(app.spreadsheetID, readRange).Do()
 	if err != nil {
 		return err
