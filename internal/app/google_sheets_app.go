@@ -11,13 +11,11 @@ import (
 	"strings"
 )
 
-// GoogleSheetsApp представляє додаток для взаємодії з Google Sheets.
 type GoogleSheetsApp struct {
 	srv           *sheets.Service
 	spreadsheetID string
 }
 
-// NewGoogleSheetsApp створює новий екземпляр додатка Google Sheets.
 func NewGoogleSheetsApp(credentialsFile string) (*GoogleSheetsApp, error) {
 	ctx := context.Background()
 	clientOption := option.WithCredentialsFile(credentialsFile)
@@ -28,12 +26,11 @@ func NewGoogleSheetsApp(credentialsFile string) (*GoogleSheetsApp, error) {
 	return &GoogleSheetsApp{srv: client}, nil
 }
 
-// Run запускає головний цикл додатка Google Sheets.
 func (app *GoogleSheetsApp) Run() {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	fmt.Print("Enter spreadsheet ID:")
-	scanner.Scan() //"1eXuEKYP35Y94PIgI6-Nym46ke7GY4_R7ZUXig1zaiBM"
+	scanner.Scan()
 	app.spreadsheetID = scanner.Text()
 
 	for {
@@ -257,14 +254,10 @@ func (app *GoogleSheetsApp) saveData(sheetName, columnName, newText string) erro
 		return err
 	}
 
-	// Calculate the row number where new data should be appended.
-	// Add 2 to the length of the existing data to account for the header row and 1-based indexing.
 	rowNumber := len(resp.Values) + 1
 
-	// Specify the range to append data to.
 	writeRange := fmt.Sprintf("%s!%s%d", sheetName, columnName, rowNumber)
 
-	// Create a ValueRange with the data to append.
 	valueRange := &sheets.ValueRange{
 		Values: [][]interface{}{{newText}},
 	}
@@ -277,13 +270,11 @@ func (app *GoogleSheetsApp) saveData(sheetName, columnName, newText string) erro
 }
 
 func (app *GoogleSheetsApp) changeSheetName(existingSheetName, newSheetName string) error {
-	// Отримуємо ідентифікатор аркуша (сторінки) за назвою.
 	sheetID := app.getSheetIDByName(existingSheetName)
 	if sheetID == -1 {
 		return fmt.Errorf("Sheet '%s' not found in Google Sheets.", existingSheetName)
 	}
 
-	// Встановлюємо нову назву аркуша.
 	requests := []*sheets.Request{
 		{
 			UpdateSheetProperties: &sheets.UpdateSheetPropertiesRequest{
@@ -296,7 +287,6 @@ func (app *GoogleSheetsApp) changeSheetName(existingSheetName, newSheetName stri
 		},
 	}
 
-	// Виконуємо запит для зміни назви аркуша.
 	_, err := app.srv.Spreadsheets.BatchUpdate(app.spreadsheetID, &sheets.BatchUpdateSpreadsheetRequest{
 		Requests: requests,
 	}).Do()
@@ -308,25 +298,21 @@ func (app *GoogleSheetsApp) changeSheetName(existingSheetName, newSheetName stri
 }
 
 func (app *GoogleSheetsApp) getSheetIDByName(sheetName string) int64 {
-	// Отримуємо список аркушів (сторінок) у файлі Google Sheets.
 	resp, err := app.srv.Spreadsheets.Get(app.spreadsheetID).Do()
 	if err != nil {
 		log.Fatalf("Unable to retrieve spreadsheet: %v", err)
 	}
 
-	// Шукаємо аркуш за назвою та повертаємо його ідентифікатор.
 	for _, sheet := range resp.Sheets {
 		if sheet.Properties.Title == sheetName {
 			return sheet.Properties.SheetId
 		}
 	}
 
-	// Якщо аркуш не знайдено, повертаємо -1.
 	return -1
 }
 
 func (app *GoogleSheetsApp) updateData(sheetName, sheetRange, newText string) error {
-	// Вносимо дані до аркуша.
 	writeRange := sheetName + "!" + sheetRange
 	valueRange := &sheets.ValueRange{
 		Values: [][]interface{}{{newText}},
@@ -339,13 +325,11 @@ func (app *GoogleSheetsApp) updateData(sheetName, sheetRange, newText string) er
 }
 
 func (app *GoogleSheetsApp) deleteSheet(sheetName string) error {
-	// Отримуємо ідентифікатор аркуша (сторінки) за назвою.
 	sheetID := app.getSheetIDByName(sheetName)
 	if sheetID == -1 {
 		return fmt.Errorf("Sheet '%s' not found in Google Sheets.", sheetName)
 	}
 
-	// Створюємо запит для видалення аркуша за його ідентифікатором.
 	requests := []*sheets.Request{
 		{
 			DeleteSheet: &sheets.DeleteSheetRequest{
@@ -354,7 +338,6 @@ func (app *GoogleSheetsApp) deleteSheet(sheetName string) error {
 		},
 	}
 
-	// Виконуємо запит для видалення аркуша.
 	_, err := app.srv.Spreadsheets.BatchUpdate(app.spreadsheetID, &sheets.BatchUpdateSpreadsheetRequest{
 		Requests: requests,
 	}).Do()
@@ -367,7 +350,6 @@ func (app *GoogleSheetsApp) deleteSheet(sheetName string) error {
 
 func (app *GoogleSheetsApp) deleteDataInRange(sheetName string, rangeToDelete string) error {
 	clearRequest := &sheets.ClearValuesRequest{}
-	// Виконуємо запит для видалення даних з вказаного діапазону.
 	_, err := app.srv.Spreadsheets.Values.Clear(app.spreadsheetID, sheetName+"!"+rangeToDelete, clearRequest).Do()
 
 	if err != nil {
